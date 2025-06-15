@@ -1,0 +1,52 @@
+# .github/workflows/copy-issue-labels.yml
+name: Copy issue labels to PR
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
+jobs:
+  copy-issue-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy labels from linked issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const body = context.payload.pull_request.body || '';
+
+            const match = body.match(/(?:Fixes|Closes|Resolves):?\s+#(\d+)/i);
+            if (!match) {
+              core.info('No issue reference found in PR body.');
+              return;
+            }
+
+            const issueNumber = parseInt(match[1], 10);
+            core.info(`Found linked issue #${issueNumber}`);
+
+            const issue = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber
+            });
+
+            const labels = issue.data.labels.map(label => label.name);
+            if (labels.length === 0) {
+              core.info('No labels found on linked issue.');
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              labels
+            });
+
+            core.info(`Copied labels to PR: ${labels.join(', ')}`);
