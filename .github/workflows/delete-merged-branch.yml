@@ -1,37 +1,21 @@
 name: Delete merged branch
 
 on:
-  push:
-    branches:
-      - main
-
-permissions:
-  contents: write
+  pull_request:
+    types:
+      - closed
 
 jobs:
-  delete-merged-branch:
+  delete-branch:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Get merged PR
-        id: pr
-        uses: octokit/request-action@v2.x
-        with:
-          route: GET /repos/${{ github.repository }}/commits/${{ github.sha }}/pulls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Delete merged branch
-        if: steps.pr.outputs.data != '[]'
         run: |
-          branch=$(echo '${{ steps.pr.outputs.data }}' | jq -r '.[0].head.ref')
+          branch="${{ github.event.pull_request.head.ref }}"
           repo="${{ github.repository }}"
           token="${{ secrets.GITHUB_TOKEN }}"
-
-          echo "Deleting branch: $branch"
-          if [[ "$branch" != "main" && "$branch" != "master" ]]; then
+          if [[ "$branch" != "master" ]]; then
             curl -s -X DELETE \
               -H "Authorization: Bearer $token" \
               -H "Accept: application/vnd.github+json" \
