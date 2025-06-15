@@ -1,0 +1,26 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feature'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'bug'
+  - title: '🧰 Maintenance'
+    labels:
+      - 'maintenance'
+  - title : '⚡ Performance'
+    labels:
+      - 'performance'
+  - title: '✅ Tests'
+    labels:
+      - 'tests'
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+no-changes-template: '- No changes'
+template: |
+  ## Changes
+
+  $CHANGES
+
+  **Full Changelog**: $COMPARE_URL
