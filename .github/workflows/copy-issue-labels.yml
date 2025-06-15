@@ -1,4 +1,4 @@
-name: Copy labels from linked issue to PR
+name: Copy labels from linked issue to PR (Debug)
 
 on:
   pull_request:
@@ -19,11 +19,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Copy labels from linked issue
+      - name: Copy timeline + copy labels
         uses: actions/github-script@v7
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
+            console.log(`🔍 PR #${prNumber}`);
 
             const timeline = await github.paginate(
               github.rest.issues.listEventsForTimeline,
@@ -35,6 +36,18 @@ jobs:
               }
             );
 
+            console.log(`📜 Timeline-Einträge (${timeline.length}):`);
+            timeline.forEach((event, i) => {
+              const base = `#${i + 1} [${event.event}]`;
+              if (event.source?.type === 'issue') {
+                const issue = event.source.issue;
+                const summary = issue?.number ? ` → Issue #${issue.number}` : '';
+                console.log(`${base}${summary}`);
+              } else {
+                console.log(base);
+              }
+            });
+
             const linkedIssue = timeline.find(event =>
               event.event === 'connected' &&
               event.source?.type === 'issue' &&
@@ -42,7 +55,7 @@ jobs:
             );
 
             if (!linkedIssue) {
-              core.info('❌ Kein verknüpfter Issue gefunden.');
+              core.warning('❌ Kein verknüpfter Issue über Timeline gefunden.');
               return;
             }
 
