@@ -2,23 +2,17 @@ name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 categories:
   - title: '🚀 Features'
-    labels:
-      - 'feature'
+    label: 'feature'
   - title: '🐛 Bug Fixes'
-    labels:
-      - 'bug'
+    label: 'bug'
   - title: '🧰 Maintenance'
-    labels:
-      - 'maintenance'
+    label: 'maintenance'
   - title : '⚡ Performance'
-    labels:
-      - 'performance'
+    label: 'performance'
   - title: '✅ Tests'
-    labels:
-      - 'tests'
+    label: 'tests'
   - title: '📚 Documentation'
-    labels:
-      - 'documentation'
+    label: 'documentation'
 
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 no-changes-template: '- No changes'
