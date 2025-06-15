@@ -1,8 +1,13 @@
-name: Copy issue labels to PR
+name: Copy labels from linked issue to PR
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+      - edited
 
 permissions:
   contents: read
@@ -12,6 +17,7 @@ permissions:
 jobs:
   copy-issue-labels:
     runs-on: ubuntu-latest
+
     steps:
       - name: Copy labels from linked issue
         uses: actions/github-script@v7
@@ -29,19 +35,19 @@ jobs:
               }
             );
 
-            const linkedIssue = timeline.find(e =>
-              e.event === 'connected' &&
-              e.source?.type === 'issue' &&
-              e.source?.issue?.number
+            const linkedIssue = timeline.find(event =>
+              event.event === 'connected' &&
+              event.source?.type === 'issue' &&
+              event.source?.issue?.number
             );
 
             if (!linkedIssue) {
-              core.info('No linked issue found via timeline.');
+              core.info('❌ Kein verknüpfter Issue gefunden.');
               return;
             }
 
             const issueNumber = linkedIssue.source.issue.number;
-            core.info(`Found linked issue #${issueNumber}`);
+            core.info(`✅ Verknüpfter Issue: #${issueNumber}`);
 
             const issue = await github.rest.issues.get({
               owner: context.repo.owner,
@@ -51,7 +57,7 @@ jobs:
 
             const labels = issue.data.labels.map(label => label.name);
             if (labels.length === 0) {
-              core.info('Linked issue has no labels.');
+              core.info('ℹ️ Keine Labels auf dem verknüpften Issue.');
               return;
             }
 
@@ -62,4 +68,4 @@ jobs:
               labels
             });
 
-            core.info(`Copied labels to PR: ${labels.join(', ')}`);
+            core.info(`🏷️ Labels übertragen: ${labels.join(', ')}`);
