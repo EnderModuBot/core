@@ -7,6 +7,19 @@ load_dotenv()
 
 
 class BaseConfig:
+    """
+    Base configuration class with runtime type checking for class variables.
+
+    This class automatically validates ClassVar attributes on subclass creation.
+    It ensures that the declared types match the actual values provided.
+
+    Supported inner types for ClassVar are:
+    - Primitive types: str, int, float, bool
+    - Type wrappers, e.g., Type[SomeClass]
+
+    :raises TypeError: If a ClassVar has an invalid or unsupported value/type.
+    """
+
     def __init_subclass__(cls) -> None:
         hints = get_type_hints(cls)
 
