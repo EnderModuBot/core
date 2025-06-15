@@ -16,6 +16,10 @@ categories:
   - title: '✅ Tests'
     labels:
       - 'tests'
+  - title: '📚 Documentation'
+    labels:
+      - 'documentation'
+
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 no-changes-template: '- No changes'
 template: |
