@@ -1,4 +1,3 @@
-# .github/workflows/copy-issue-labels.yml
 name: Copy issue labels to PR
 
 on:
@@ -19,15 +18,29 @@ jobs:
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
-            const body = context.payload.pull_request.body || '';
 
-            const match = body.match(/(?:Fixes|Closes|Resolves):?\s+#(\d+)/i);
-            if (!match) {
-              core.info('No issue reference found in PR body.');
+            const timeline = await github.paginate(
+              github.rest.issues.listEventsForTimeline,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                per_page: 100
+              }
+            );
+
+            const linkedIssue = timeline.find(e =>
+              e.event === 'connected' &&
+              e.source?.type === 'issue' &&
+              e.source?.issue?.number
+            );
+
+            if (!linkedIssue) {
+              core.info('No linked issue found via timeline.');
               return;
             }
 
-            const issueNumber = parseInt(match[1], 10);
+            const issueNumber = linkedIssue.source.issue.number;
             core.info(`Found linked issue #${issueNumber}`);
 
             const issue = await github.rest.issues.get({
@@ -38,7 +51,7 @@ jobs:
 
             const labels = issue.data.labels.map(label => label.name);
             if (labels.length === 0) {
-              core.info('No labels found on linked issue.');
+              core.info('Linked issue has no labels.');
               return;
             }
 
