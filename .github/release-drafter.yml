@@ -22,5 +22,3 @@ template: |
   ## Changes
 
   $CHANGES
-
-  **Full Changelog**: $COMPARE_URL
